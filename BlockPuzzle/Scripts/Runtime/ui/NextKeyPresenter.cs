@@ -1,47 +1,50 @@
 ﻿using BlockPuzzle.Scripts.Runtime.configs;
 using BlockPuzzle.Scripts.Runtime.persistence;
+using I2.Loc;
 using JetBrains.Annotations;
 using TMPro;
 using UnityEngine;
 using Zenject;
 
-
-namespace BlockPuzzle.Scripts.Runtime.ui {
+namespace BlockPuzzle.Scripts.Runtime.ui 
+{
 	[RequireComponent(typeof(TMP_Text))]
-	public class NextKeyPresenter : MonoBehaviour {
+	public class NextKeyPresenter : MonoBehaviour 
+	{
 		private BlockPuzzleConfig  _config;
 		private BlockPuzzleAttempt _attempt;
-
-		private TMP_Text _textComponent;
-		private string   _pattern;
-
+		private TMP_Text 		   _textComponent;
 
 		[Inject]
 		[UsedImplicitly]
-		private void SetDependencies (BlockPuzzleConfig config, BlockPuzzleAttempt attempt) {
+		private void SetDependencies (BlockPuzzleConfig config, BlockPuzzleAttempt attempt) 
+		{
 			_config  = config;
 			_attempt = attempt;
 		}
 
-		private void Awake () {
+		private void Awake () 
+		{
 			_textComponent = GetComponent <TMP_Text>();
-			_pattern       = _textComponent.text;
-
+			
 			_attempt.Score.Subscribe(Refresh);
 		}
 
-		private void Start () {
+		private void Start () 
+		{
 			Refresh(_attempt.Score.Value);
 		}
 
-		private void OnDestroy () {
+		private void OnDestroy () 
+		{
 			_attempt.Score.Unsubscribe(Refresh);
 		}
 
-		private void Refresh (ulong score) {
-			ulong  nextKey = (_attempt.Score.Value / _config.ScorePerKey + 1) * _config.ScorePerKey;
-			string text    = _pattern.Replace("@@@", nextKey.ToString());
+		private void Refresh (ulong score) 
+		{
+			ulong nextKey = (_attempt.Score.Value / _config.ScorePerKey + 1) * _config.ScorePerKey;
 
+			var text = LocalizationManager.GetTranslation("block_brain_puzzle/game/next_key") + ": " + nextKey;
 			_textComponent.SetText(text);
 		}
 	}

@@ -7,10 +7,10 @@ using Flime.Core.Platform.Interfaces;
 using JetBrains.Annotations;
 using Services;
 using TMPro;
+using UI.Screens;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
-
 
 namespace BlockPuzzle.Scripts.Runtime.ui {
 	[RequireComponent(typeof(CanvasGroup))]
@@ -27,11 +27,13 @@ namespace BlockPuzzle.Scripts.Runtime.ui {
 
 		private BlockPuzzleUserData    _userData;
 		private BlockPuzzleGameHandler _gameHandler;
-		private IMainMediator          _mediator;
 		private IAds                   _ads;
+		private IAdManager 			   _adManager;
+		private IMainMediator          _mediator;
 
 		protected CanvasGroup CanvasGroup;
 
+		private int _keys_gained;
 
 		[Inject]
 		[UsedImplicitly]
@@ -39,12 +41,14 @@ namespace BlockPuzzle.Scripts.Runtime.ui {
 			BlockPuzzleGameHandler gameHandler,
 			BlockPuzzleUserData userData,
 			IMainMediator mediator,
-			IAds ads
+			IAds ads,
+			IAdManager adManager
 		) {
-			_mediator    = mediator;
 			_gameHandler = gameHandler;
 			_userData    = userData;
+			_mediator    = mediator;
 			_ads         = ads;
+			_adManager 	 = adManager;
 		}
 
 		protected virtual void Awake () {
@@ -59,14 +63,17 @@ namespace BlockPuzzle.Scripts.Runtime.ui {
 			TurnProcessor.AttemptFinishedWithoutBestScore -= Show;
 		}
 
-		protected void Show (AttemptResult attemptResult) {
+		protected void Show (AttemptResult attemptResult)
+		{
+			_keys_gained = (int) attemptResult.EarnedKeys;
+			
 			_ads.HideBanner();
 
 			gameObject.SetActive(true);
 
 			_earnedScorePresenter.SetText(attemptResult.EarnedScore.ToString());
 			_bestScorePresenter.SetText(_userData.BestScore.ToString());
-			_earnedKeysPresenter.SetText(attemptResult.EarnedKeys.ToString());
+			_earnedKeysPresenter.SetText(_keys_gained.ToString());
 
 			_levelPreviewPresenter.sprite = _gameHandler.Board.TakeLevelSnapshot();
 
@@ -92,17 +99,13 @@ namespace BlockPuzzle.Scripts.Runtime.ui {
 		public void GoToMainMenu () {
 			void NewFunction () {
 				_gameHandler.StopGame();
-
 				Hide();
 
-				_mediator.ShowMainMenu();
+				_mediator.ShowMainMenu(new MainMenuData {keys_gained = _keys_gained});
+//				_gameHandler.GoToMainMenu(_keys_gained);
 			}
 
-			_ads.ShowInterstitial(
-				NewFunction,
-				error => NewFunction(),
-				"block_puzzle" // TODO what
-			);
+			_adManager.ShowInterstitial(AdPlacementName.BlockPuzzleWinScreenMain, NewFunction);
 		}
 
 		public void GetMoreKeys () {
@@ -110,7 +113,7 @@ namespace BlockPuzzle.Scripts.Runtime.ui {
 
 			Hide();
 
-			_gameHandler.StartGame();
+			_gameHandler.StartGame(AdPlacementName.BlockPuzzleNewGameWinScreen);
 		}
 	}
 }

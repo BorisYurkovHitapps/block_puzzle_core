@@ -56,7 +56,8 @@ namespace BlockPuzzle.Scripts.Runtime.tutorial {
 
 		private void InitializeSteps () {
 			const float  stepDelay        = 0.45f;
-			const string analyticsLiteral = "block_puzzle_tutorial_";
+//			const string analyticsLiteral = "block_puzzle_tutorial_";
+			const string analyticsLiteral = "";
 
 			CreateStep()
 				.WithAnalyticsLiteral($"{analyticsLiteral}1")

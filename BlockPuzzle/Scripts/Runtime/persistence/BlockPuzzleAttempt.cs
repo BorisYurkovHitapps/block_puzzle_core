@@ -97,5 +97,9 @@ namespace BlockPuzzle.Scripts.Runtime.persistence {
 
 			_time += UnityEngine.Time.deltaTime;
 		}
+
+		public bool IsExistsSavedGame () {
+			return _boardState != null;
+		}
 	}
 }

@@ -1,9 +1,7 @@
 ﻿using JetBrains.Annotations;
-using Services;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
-
 
 namespace BlockPuzzle.Scripts.Runtime.ui {
 	[RequireComponent(typeof(Button))]
@@ -11,14 +9,11 @@ namespace BlockPuzzle.Scripts.Runtime.ui {
 		private Button _button;
 
 		private BlockPuzzleGameHandler _gameHandler;
-		private IMainMediator          _mediator;
-
 
 		[Inject]
 		[UsedImplicitly]
-		private void SetDependencies (BlockPuzzleGameHandler gameHandler, IMainMediator mediator) {
+		private void SetDependencies (BlockPuzzleGameHandler gameHandler) {
 			_gameHandler = gameHandler;
-			_mediator    = mediator;
 		}
 
 		private void Awake () {
@@ -28,8 +23,7 @@ namespace BlockPuzzle.Scripts.Runtime.ui {
 		}
 
 		private void OnClick () {
-			_gameHandler.StopGame();
-			_mediator.ShowMainMenu();
+			_gameHandler.GoToMainMenu();
 		}
 	}
 }

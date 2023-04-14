@@ -10,8 +10,7 @@ namespace BlockPuzzle.Scripts.Runtime.persistence {
 		[UsedImplicitly] public const  string PlayerPrefsKey = "block_puzzle_save_data";
 		[UsedImplicitly] public static string FilePath => Path.Combine(Application.persistentDataPath, $"{PlayerPrefsKey}.json");
 
-		public static event Action OnKeyAdded   = delegate {};
-		public static event Action OnKeyRemoved = delegate {};
+		public static event Action OnKeyAdded = delegate {};
 
 
 		[JsonProperty("tutorial_finished")]
@@ -65,7 +64,7 @@ namespace BlockPuzzle.Scripts.Runtime.persistence {
 
 			_persistenceHandler.Save();
 
-			Debug.Log("-bp grant keys");
+			Debug.Log("-bp Grant keys: " + count);
 			OnKeyAdded.Invoke();
 		}
 
@@ -78,8 +77,6 @@ namespace BlockPuzzle.Scripts.Runtime.persistence {
 			ResetCurrentFinishedAttempts();
 
 			_persistenceHandler.Save();
-
-			OnKeyRemoved.Invoke();
 
 			return true;
 		}

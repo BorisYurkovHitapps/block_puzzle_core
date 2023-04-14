@@ -11,7 +11,6 @@ using UnityEngine;
 using Zenject;
 using IEventSystemHandler = Services.EventSystemHandler.IEventSystemHandler;
 
-
 namespace BlockPuzzle.Scripts.Runtime.gameplay.turnProcessing {
 	[UsedImplicitly]
 	public class TurnProcessor : IInitializable, IDisposable {
@@ -34,6 +33,7 @@ namespace BlockPuzzle.Scripts.Runtime.gameplay.turnProcessing {
 		private readonly BlockPuzzleAttempt  _attempt;
 		private readonly AnalyticsWrapper    _analyticsWrapper;
 		private readonly IEventSystemHandler _eventSystemHandler;
+		private readonly IAdManager 		 _adManager;
 
 
 		private TurnProcessor (
@@ -43,12 +43,14 @@ namespace BlockPuzzle.Scripts.Runtime.gameplay.turnProcessing {
 			BlockPuzzleUserData userData,
 			BlockPuzzleAttempt attempt,
 			AnalyticsWrapper analyticsWrapper,
-			IEventSystemHandler eventSystemHandler
+			IEventSystemHandler eventSystemHandler,
+			IAdManager adManager
 		) {
 			_config             = config;
 			_userData           = userData;
 			_analyticsWrapper   = analyticsWrapper;
 			_eventSystemHandler = eventSystemHandler;
+			_adManager 			= adManager;
 
 			_roster  = roster;
 			_board   = board;
@@ -81,6 +83,8 @@ namespace BlockPuzzle.Scripts.Runtime.gameplay.turnProcessing {
 
 		private void OnTutorialSequenceEnded () {
 			_suspendFailCheckForTutorial = false;
+			_attempt.StartTimeTracking();
+			_analyticsWrapper.game_start_level();
 		}
 
 		private void OnShapeReleased (Shape shape) {
@@ -141,15 +145,20 @@ namespace BlockPuzzle.Scripts.Runtime.gameplay.turnProcessing {
 				_userData.GrantKeys(keysGained);
 				_userData.IncrementFinishedAttempts();
 
-				_analyticsWrapper.game_complete_level(keysGained, _attempt.Time);
+				if (_userData.IsTutorialFinished)
+					_analyticsWrapper.game_complete_level(keysGained, _attempt.Time);
 
 				_attempt.Reset();
 
-				if (isBestScoreBeaten) {
-					AttemptFinishedWithBestScore?.Invoke(attemptResult);
-				} else {
-					AttemptFinishedWithoutBestScore?.Invoke(attemptResult);
-				}
+				_adManager.ShowInterstitial(
+					AdPlacementName.BlockPuzzleWinScreenBefore,
+					() =>
+					{
+						if (isBestScoreBeaten)
+							AttemptFinishedWithBestScore?.Invoke(attemptResult);
+						else
+							AttemptFinishedWithoutBestScore?.Invoke(attemptResult);
+					});
 			} else {
 				_attempt.Store();
 			}

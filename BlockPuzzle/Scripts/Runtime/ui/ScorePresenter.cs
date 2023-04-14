@@ -41,7 +41,7 @@ namespace BlockPuzzle.Scripts.Runtime.ui {
 		private void OnScoresChanged (ulong currentScores) {
 			ulong delta = currentScores - _score;
 
-			_score = currentScores;
+			_score = currentScores; 
 
 			_tween?.Kill();
 			_tween = DOTween

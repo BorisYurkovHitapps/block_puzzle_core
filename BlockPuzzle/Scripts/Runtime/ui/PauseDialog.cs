@@ -20,8 +20,7 @@ namespace BlockPuzzle.Scripts.Runtime.ui {
 		}
 
 		public void GoToMainMenu () {
-			_gameHandler.StopGame();
-			_mediator.ShowMainMenu();
+			_gameHandler.GoToMainMenu();
 
 			Hide(null);
 		}
